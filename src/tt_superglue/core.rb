@@ -35,9 +35,27 @@ module TT::Plugins::SuperGlue
   ### MENU & TOOLBARS ### ------------------------------------------------------
   
   unless file_loaded?( __FILE__ )
+    # Commands
+    cmd = UI::Command.new( PLUGIN_NAME ) {
+      self.select_tool( SuperGlueTool )
+    }
+    cmd.status_bar_text = 'Re-attach or detach glue-to components.'
+    cmd.tooltip = PLUGIN_NAME
+    cmd.small_icon = File.join( PATH_ICONS, 'superglue_16.png' )
+    cmd.large_icon = File.join( PATH_ICONS, 'superglue_24.png' )
+    cmd_activate_superglue = cmd
+
     # Menus
     m = TT.menu( 'Tools' )
-    m.add_item( 'Superglue' )   { self.select_tool( SuperGlueTool ) }
+    m.add_item( cmd_activate_superglue )
+    
+    # Toolbar
+    toolbar = UI::Toolbar.new( PLUGIN_NAME )
+    toolbar.add_item( cmd_activate_superglue )
+    if toolbar.get_last_state == TB_VISIBLE
+      toolbar.restore
+      UI.start_timer( 0.1, false ) { toolbar.restore } # SU bug 2902434
+    end
   end 
   
   
@@ -59,8 +77,8 @@ module TT::Plugins::SuperGlue
     def initialize
       # Icon: http://mattahan.deviantart.com/art/Buuf-37966044?q=boost%3Apopular+buuf+icon&qo=0
       #       Paul Davey aka Mattahan. All rights reserved. 
-      cursor_superglue = File.join( PATH_ICONS, 'Superglue.png')
-      cursor_solvent   = File.join( PATH_ICONS, 'Solvent.png')
+      cursor_superglue = File.join( PATH_CURSORS, 'superglue.png')
+      cursor_solvent   = File.join( PATH_CURSORS, 'solvent.png')
       @cursor_superglue = UI.create_cursor(cursor_superglue,  15, 0)
       @cursor_solvent   = UI.create_cursor(cursor_solvent,    15, 0)
       
